@@ -1,0 +1,11 @@
+1.  download nexus latest version "nexus-3.12.0-01-win64" aplication for windows.
+
+2.	extract it in your any local drive. it will extract below two folders
+		nexus-3.12.0-01
+		sonatype-work
+3.	before starting nexus need to change the port in D:\software\nexus-3.12.0-01-win64\nexus-3.12.0-01\etc\nexus-default.properties 
+		application-port=8081 to any like 8091 and save the file.
+	
+		
+4.	go to D:\software\nexus-3.12.0-01-win64\nexus-3.12.0-01\bin and open it in a console and run below command
+		nexus.exe /run

@@ -1,0 +1,77 @@
+#############################   installing mysql on centos 7 ##############################
+
+1. Create sonar user
+$ adduser sonar
+
+2. Set password
+$ passwd sonar
+
+3. Add sonar user to sudoers group
+$ usermod -aG wheel sonar 
+$ su - sonar
+
+4. Download and add the following MySQL Yum repository to install the latest version of MySQL
+$ wget http://dev.mysql.com/get/mysql57-community-release-el7-7.noarch.rpm
+
+5. Now install the downloaded package
+$ sudo yum localinstall mysql57-community-release-el7-7.noarch.rpm
+
+6. Verify that the MySQL Yum repository has been added successfully or Not 
+$ yum repolist enabled | grep "mysql.*-community.*"
+$ rpm -qa | grep mysql
+
+7. Now Install latest version of MySQL (currently 5.7)
+[sonar@localhost ~]$ sudo yum install mysql-community-server
+
+
+8. After successful installation of MySQL, it’s time to start the MySQL server
+$ service mysqld start
+
+9. You can verify the status of the MySQL server
+$ service mysqld status
+
+10. Check mysql version
+$ mysql --version
+
+11. login to mysql console : 
+$ mysql -u root -p                               
+
+#####################    
+Password : mysql    #
+#####################
+
+12. run below query to create new user 
+
+mysql> CREATE DATABASE sonar CHARACTER SET utf8 COLLATE utf8_general_ci; CREATE USER 'sonar' IDENTIFIED BY 'sonar'; GRANT ALL ON sonar.* TO 'sonar'@'%' IDENTIFIED BY 'sonar'; GRANT ALL ON sonar.* TO 'sonar'@'localhost' IDENTIFIED BY 'sonar'; FLUSH PRIVILEGES;
+
+
+############################## installing sonar on centos #################################
+
+
+13. install java and unzip 
+$sudo yum install unzip -y
+$sudo yum install java-1.8.0-openjdk -y
+
+14. 3.	Download and unzip the recent SonarQube 
+$sudo wget https://sonarsource.bintray.com/Distribution/sonarqube/sonarqube-7.1.zip
+$ unzip sonarqube-7.1.zip
+
+15. move it to  /opt/sonar
+$ sudo mv sonarqube-7.1 /opt/sonar
+
+16. uncomment and add below values in /opt/sonar/conf/sonar.properties  file 
+$ vi /opt/sonar/conf/sonar.properties
+
+[ Modify appropriate mysql configuration , uncomment credential for mysql related setting ]
+sonar.jdbc.username : sonar
+sonar.jdbc.password : sonar
+sonar.jdbc.url : jdbc:mysql://localhost:3306/sonar?useUnicode=true&characterEncoding=utf8&rewriteBatchedStatements=true&useConfigs=maxPerformance&useSSL=false
+sonar.web.port=9000
+
+17. start sonarqube server
+
+	Go to your appropriate installation directory
+			$cd /opt/sonar/bin/linux-x86-64/
+	Start SonarQube service
+			$sudo ./sonar.sh start
+

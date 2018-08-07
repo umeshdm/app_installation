@@ -1,0 +1,45 @@
+####	#########################   installing AWX on centos 7 ##############################
+
+1. Create awx user
+	$ adduser awxuser
+
+2. Set password for awx user
+	$ passwd awxuser
+
+3. Add awx user to sudoers group
+	$ usermod -aG wheel awxuser 
+	$ su - awxuser
+4. First things first, update the OS and reboot.
+	$ sudo yum -y update
+	$ sudo reboot
+5. Install requisite base packages
+	$ sudo yum -y install bzip2 device-mapper-persistent-data gcc gcc-c++ git gettext lvm2 yum-utils
+6. Add the EPEL and Docker repositories
+	$ sudo yum -y install epel-release
+	$ sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+	$ sudo yum -y update
+7. Install Ansible and pip.
+	$ sudo yum -y install ansible python-pip
+
+8. Set up Docker CE
+	$ sudo yum -y install docker-ce
+	$ sudo systemctl enable docker
+	$ sudo systemctl start docker
+	
+9. Install docker-py via pip.
+	$sudo pip install -U docker-py
+	
+10. OPTIONAL: You can check and customize deployment variables via the inventory file.	
+	$ vi inventory
+	
+11. As root, clone and deploy AWX to Docker containers via Ansible.
+	$ git clone --depth 50 https://github.com/ansible/awx.git
+	$ cd awx/installer/
+	$ ansible-playbook -i inventory install.yml
+
+12. Monitor the migration logs.
+	$ docker logs -f awx_task
+	
+13. Once you start seeing the awx.main.scheduler running Tower task manager you are up. Point your browser to the server and you should get the AWX login page. The default user is admin and the password is password (unless you changed it in the inventory file in step 7.)	
+
+http://localhost:8080/#/home

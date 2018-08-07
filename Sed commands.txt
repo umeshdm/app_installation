@@ -1,0 +1,13 @@
+Some of the SED commands
+
+sed 1d t1                  -------  Delete first line
+
+sed '/^2/d' t1             -------  Delete line matching 
+
+sed -n '1,3p' t1		   -------  Prints line 1 to 3 
+
+sed -n '/perth/p' t1       -------  Prints only line irrespective of case
+
+sed '1s/text/binary/g'     -------  replace in only
+
+sed 's/perth/darwin/gi' t1 -------  replace all occarances

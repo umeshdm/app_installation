@@ -1,0 +1,125 @@
+#Upload  Mavan project jars in snapshot repository and Release repository
+
+1.	We need one maven project without any error it should create project jar.
+
+			pom.xml for project : 
+									<project>
+									  <modelVersion>4.0.0</modelVersion>
+									 
+									  <groupId>maven-example</groupId>
+									  <artifactId>dev-example</artifactId>
+									  <version>1.1.5-SNAPSHOT</version>
+									  
+									  <distributionManagement>
+										   <snapshotRepository>
+											  <id>nexus</id>
+											  <url>http://localhost:8091/repository/nexus-snapshots/</url>
+										   </snapshotRepository>
+											<repository>
+												<id>nexus</id>
+												<url>http://localhost:8091/repository/nexus-release/</url>
+											</repository>
+									  </distributionManagement>
+
+									</project>
+
+2.	We need to update project parent"pom.xml" file with below xml tags to define the repository path for release and snapshot
+
+									  <distributionManagement>
+										   <snapshotRepository>
+											  <id>nexus</id>
+											  <url>http://localhost:8091/repository/nexus-snapshots/</url>
+										   </snapshotRepository>
+											<repository>
+												<id>nexus</id>
+												<url>http://localhost:8091/repository/nexus-release/</url>
+											</repository>
+									  </distributionManagement>
+
+3.	For encripting password we need to create C:\Users\um385201\.m2\settings-security.xml file
+
+		<settingsSecurity>
+			<master>{rsB56BJcqoEHZqEZ0R1VR4TIspmODx1Ln8/PVvsgaGw=}</master>
+		</settingsSecurity>		
+
+			then we need to run below command :
+			
+			mvn -ep admin123    --- [ this will generate one new passkey ]
+			{I3K235IiEroHVq52d+LktWGFoOzwu3mMZPe4wrElVbY=}  -----------> this passkey need to be placed in settings.xml password tag
+		
+4.	Now update username and password in the C:\Users\um385201\.m2\settings.xml  file to access Nexus repository through your project pom. 
+
+		<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+		<settings xmlns="http://maven.apache.org/SETTINGS/1.1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.1.0 http://maven.apache.org/xsd/settings-1.1.0.xsd">
+		   <servers>
+			  <server>
+				<id>nexus</id>
+				<username>admin</username>
+				<password>{I3K235IiEroHVq52d+LktWGFoOzwu3mMZPe4wrElVbY=}</password>
+			 </server>	
+		  </servers>
+		</settings>		
+5. 	after this we need to just run our project with below command 
+			mvn clean deploy -Dmaven.test.skip=true  ------->  will get below output 
+			
+			
+UM385201@L-156162158 MINGW64 /d/RepoEXP
+$ mvn clean deploy -Dmaven.test.skip=true
+[INFO] Scanning for projects...
+[INFO]
+[INFO] ------------------------------------------------------------------------
+[INFO] Building dev-example 1.1.5-SNAPSHOT
+[INFO] ------------------------------------------------------------------------
+[INFO]
+[INFO] --- maven-clean-plugin:2.5:clean (default-clean) @ dev-example ---
+[INFO] Deleting D:\RepoEXP\target
+[INFO]
+[INFO] --- maven-resources-plugin:2.6:resources (default-resources) @ dev-example ---
+[WARNING] Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+[INFO] skip non existing resourceDirectory D:\RepoEXP\src\main\resources
+[INFO]
+[INFO] --- maven-compiler-plugin:3.1:compile (default-compile) @ dev-example ---
+[INFO] No sources to compile
+[INFO]
+[INFO] --- maven-resources-plugin:2.6:testResources (default-testResources) @ dev-example ---
+[INFO] Not copying test resources
+[INFO]
+[INFO] --- maven-compiler-plugin:3.1:testCompile (default-testCompile) @ dev-example ---
+[INFO] Not compiling test sources
+[INFO]
+[INFO] --- maven-surefire-plugin:2.12.4:test (default-test) @ dev-example ---
+[INFO] Tests are skipped.
+[INFO]
+[INFO] --- maven-jar-plugin:2.4:jar (default-jar) @ dev-example ---
+[WARNING] JAR will be empty - no content was marked for inclusion!
+[INFO] Building jar: D:\RepoEXP\target\dev-example-1.1.5-SNAPSHOT.jar
+[INFO]
+[INFO] --- maven-install-plugin:2.4:install (default-install) @ dev-example ---
+[INFO] Installing D:\RepoEXP\target\dev-example-1.1.5-SNAPSHOT.jar to C:\Users\um385201\.m2\repository\maven-example\dev-example\1.1.5-SNAPSHOT\dev-example-1.1.5-SNAPSHOT.jar
+[INFO] Installing D:\RepoEXP\pom.xml to C:\Users\um385201\.m2\repository\maven-example\dev-example\1.1.5-SNAPSHOT\dev-example-1.1.5-SNAPSHOT.pom
+[INFO]
+[INFO] --- maven-deploy-plugin:2.7:deploy (default-deploy) @ dev-example ---
+Downloading: http://localhost:8091/repository/nexus-snapshots/maven-example/dev-example/1.1.5-SNAPSHOT/maven-metadata.xml
+Uploading: http://localhost:8091/repository/nexus-snapshots/maven-example/dev-example/1.1.5-SNAPSHOT/dev-example-1.1.5-20180531.100822-1.jar
+Uploaded: http://localhost:8091/repository/nexus-snapshots/maven-example/dev-example/1.1.5-SNAPSHOT/dev-example-1.1.5-20180531.100822-1.jar (1.4 kB at 4.4 kB/s)
+Uploading: http://localhost:8091/repository/nexus-snapshots/maven-example/dev-example/1.1.5-SNAPSHOT/dev-example-1.1.5-20180531.100822-1.pom
+Uploaded: http://localhost:8091/repository/nexus-snapshots/maven-example/dev-example/1.1.5-SNAPSHOT/dev-example-1.1.5-20180531.100822-1.pom (500 B at 2.8 kB/s)
+Downloading: http://localhost:8091/repository/nexus-snapshots/maven-example/dev-example/maven-metadata.xml
+Downloaded: http://localhost:8091/repository/nexus-snapshots/maven-example/dev-example/maven-metadata.xml (364 B at 4.7 kB/s)
+Uploading: http://localhost:8091/repository/nexus-snapshots/maven-example/dev-example/1.1.5-SNAPSHOT/maven-metadata.xml
+Uploaded: http://localhost:8091/repository/nexus-snapshots/maven-example/dev-example/1.1.5-SNAPSHOT/maven-metadata.xml (774 B at 4.5 kB/s)
+Uploading: http://localhost:8091/repository/nexus-snapshots/maven-example/dev-example/maven-metadata.xml
+Uploaded: http://localhost:8091/repository/nexus-snapshots/maven-example/dev-example/maven-metadata.xml (404 B at 1.1 kB/s)
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 4.279 s
+[INFO] Finished at: 2018-05-31T15:38:23+05:30
+[INFO] Final Memory: 16M/54M
+[INFO] ------------------------------------------------------------------------
+
+			
+			
+			
+			
+									  

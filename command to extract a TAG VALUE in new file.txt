@@ -1,0 +1,30 @@
+####################  Command to get Tag value from xml file ########################################
+
+sed -n 's/<version>\(.*\)<\/version>/\1/p' pom.xml | head -1 > version.properties
+var="$(cat version.properties)"
+var="$(echo $var | xargs)"
+echo "version=$var" > version.properties
+
+
+
+
+
+#####################  Command to get attribute value of xml file into new file ##########################
+
+sed -n 's/.*version="\([^"]*\).*/\1/p' config.xml  > version.properties
+
+
+grep -oP 'version="\K[^"]*' config.xml > test1.txt
+
+#!/bin/bash
+var1="$(sed -n 's/.*version="\([^"]*\).*/\1/p' config.xml)"
+var2="$(sed -n 's/.*id="\([^"]*\).*/\1/p' config.xml)"
+echo "version=$var1" > env.properties
+echo "id=$var2" >> env.properties
+
+######################  curl command for uploading jar to nexus repository ##############################################
+
+
+curl -v -u admin:admin123 --upload-file android-debug.apk http://localhost:8091/repository/curl-snaphot/com/wipro/in/junit/4.2-SNAPSHOT/junit-4.2-SNAPSHOT.jar
+
+

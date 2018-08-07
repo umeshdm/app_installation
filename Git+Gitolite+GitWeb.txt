@@ -1,0 +1,220 @@
+Gitolite Final Steps : 
+
+Client Machine :
+	$ssh-keygen -t rsa -C "Git-Admin"
+	Note : For generating multiple ssh keys on the same machine 
+			ssh-keygen -t rsa -f ~/.ssh/Sunny -C "Sunny"
+	$scp -P 2222 id_rsa.pub root@127.0.0.1:/home/git/
+
+Git Server :
+
+Step 1: Install git,http and perl dependency.
+	$yum -y install git httpd perl-Time-HiRes perl-Data-Dumper
+
+Step 2: Create user git and change its gid and uid
+	$useradd git
+	$usermod -u 600 git
+	$groupmod -g 600 git
+
+Step3: Rename the id_rsa.pub file which you did scp from your system.And move the rename files to /home/git and change its owner & group with git
+	$mv /home/git/id_rsa.pub /home/git/Git-Admin.pub ; chown git:git /home/git/Git-Admin.pub
+
+Step 4: Login with user git directly from terminal.
+Do not set password for user git. And git clone the gitolite from github.com
+	$su -l git
+	$whoami          (The command will show you log in with which user)
+	$echo $HOME       (The command will show what is your home directory)
+	$git clone git://github.com/sitaramc/gitolite
+
+Step 4: Create bin directory in /home/git and setup the Git-Admin account.
+Note: We renamed the id_rsa.pub file to Git-Admin.pub ,the reason is the Gitolite will provide same name of user in gitolite.conf file as the name of .pub file.
+for eg. if I use only id_rsa.pub then “id_rsa” user will be created.Hence if you are adding any user in Git Server by using its ssh key, rename the user’s id_rsa.pub key with user-name.pub .
+like joe’s rsa file should be change into joe.pub (id_rsa.pub –rename–> joe.pub)
+	$mkdir -p /home/git/bin
+	$gitolite/install -ln
+	$gitolite setup -pk Git-Admin.pub
+
+Step 5: Exit from user git login and again use the user root. Now check what are values defined for suexec bydefault. Use the command “suexec -V”
+	$exit
+	$suexec -V
+Given below is my server’s suexec details.
+ -D AP_DOC_ROOT="/var/www"
+ -D AP_GID_MIN=100
+ -D AP_HTTPD_USER="apache"
+ -D AP_LOG_EXEC="/var/log/httpd/suexec.log"
+ -D AP_SAFE_PATH="/usr/local/bin:/usr/bin:/bin"
+ -D AP_UID_MIN=500
+ -D AP_USERDIR_SUFFIX="public_html"
+
+Step 6: Create a directory bin in /var/www (Why /var/www ? because I got the detail from suexec -V,see parameter AP_DOC_ROOT)
+Below given command will create directory bin in /var/www with permission 0755 and owner &group is git
+	$install -d -m 0755 -o git -g git /var/www/bin
+	
+Step 7: Create a bash script with name gitolite-suexec-wrapper.sh in /var/www/bin/. Then save and exit.(I am using vi editor,you can choose your any other editor)
+	$vi /var/www/bin/gitolite-suexec-wrapper.sh
+#!/bin/bash
+#
+# Suexec wrapper for gitolite-shell
+#
+
+export GIT_PROJECT_ROOT="/home/git/repositories"
+export GITOLITE_HTTP_HOME="/home/git"
+
+exec ${GITOLITE_HTTP_HOME}/gitolite/src/gitolite-shell
+
+Step 8: Set ownership and permission of /var/www/bin and gitolite-suexec-wrapper.sh
+	$chown -R git:git /var/www/bin
+	$chmod 750 /var/www/bin/gitolite-suexec-wrapper.sh
+	$chmod 755 /var/www/bin
+
+Step 9: Now change the value of “UMASK 0077,” into “UMASK => 0027,”in file /home/git/.gitolite.rc
+	$vi /home/git/.gitolite.rc
+	UMASK => 0027,
+
+Client Machine :
+	$git clone ssh://git@127.0.0.1:2222/gitolite-admin.git
+Diff private key same machine:
+	$ ssh-agent bash -c 'ssh-add "C:/Users/su951407/.ssh/Sunny"; git clone ssh://git@127.0.0.1:2222/clix.git'
+
+The cloned repository contains the following files and directories.
+
+[Client]$ tree
+.
+├── conf
+│   └── gitolite.conf
+└── keydir
+    └── user.pub
+
+2 directories, 2 files
+
+Git Web Installation Steps :
+
+Step 1: Install GitWeb
+	$yum install gitweb
+
+Step 2: By-Default the gitweb will be installed in /var/www/git directory.(It has gitweb.cgi file)
+We will rename git directory as gitweb. And move the renamed directory inside /var/www/html
+
+	$mv /var/www/git /var/www/html/gitweb
+
+Step 3: Change the ownership of /var/www/html/gitweb
+
+	$chown -R git:git /var/www/html/gitweb
+	
+Given below are the details of my server
+
+[root@gitserver html]# chown -R git:git gitweb/
+[root@gitserver html]# ls -ld gitweb/
+drwxr-xr-x 2 git git 4096 Jun  1 12:36 gitweb/
+[root@gitserver html]# ls -la gitweb/
+total 252
+drwxr-xr-x 2 git  git    4096 Jun  1 12:36 .
+drwxr-xr-x 3 root root   4096 Jun  1 12:34 ..
+-rw-r--r-- 1 git  git     115 Apr 24  2010 git-favicon.png
+-rw-r--r-- 1 git  git     207 Apr 24  2010 git-logo.png
+-rwxr-xr-x 1 git  git  204754 Jun  1 12:36 gitweb.cgi
+-rw-r--r-- 1 git  git    8379 Apr 24  2010 gitweb.css
+-rw-r--r-- 1 git  git   24142 Apr 24  2010 gitweb.js
+[root@gitserver html]#
+
+Step 4: Edit the file /etc/gitweb.conf. and change the value of two variables
+$projectroot and $projects_list as given below
+
+	$vi /etc/gitweb.conf
+    our $projectroot = "/home/git/repositories/";
+    our $projects_list = "/home/git/projects.list";
+
+Step 5: Edit the file /var/www/html/gitweb/gitweb.cgi and change the value of two variables
+$projectroot and $projects_list as given below
+
+	$vi /var/www/html/gitweb/gitweb.cgi
+    our $projectroot = "/home/git/repositories";
+    our $projects_list = "/home/git/projects.list";
+
+Step 6: Create dummy folder git . And be carefull with permissions,owner and group
+
+	$install -d -m 0755 -o apache -g apache /var/www/git  (This is dummy one)
+	
+Step 7: Open the /etc/httpd/conf/httpd.conf file and in last line paste the given below VirtualHost Configuration.
+
+Note: If you have set the hostname and FQDN of git server then you can uncomment the ServerName,ServerAlias related lines and write the information which you have. If you do not have these info ,no problem paste the content as it is.
+
+	$vi /etc/httpd/conf/httpd.conf
+<VirtualHost *:80>
+
+  # You can comment out the below 3 lines and put correct value as per your server information
+  #  ServerName        gitserver.example.com
+  #  ServerAlias       gitserver
+  #  ServerAdmin       youremailid@example.com
+
+    DocumentRoot /var/www/git
+    <Directory /var/www/git>
+        Options       None
+        AllowOverride none
+        Order         allow,deny
+        Allow         from all
+        
+    </Directory>
+
+    SuexecUserGroup git git
+    ScriptAlias /git/ /var/www/bin/gitolite-suexec-wrapper.sh/
+    ScriptAlias /gitmob/ /var/www/bin/gitolite-suexec-wrapper.sh/
+
+    <Location /git>
+        AuthType Basic
+        AuthName "Git Access"
+        Require valid-user
+        AuthUserFile /etc/httpd/conf/git.passwd
+    </Location>
+</VirtualHost>
+
+Step 8: Edit the /etc/httpd/conf.d/git.conf file. After installation of GitWeb this git.conf file created itself. Here we are doing some changes as per our Git Server. Carefully see each line which I edited. Do not skip it is important part also.
+
+	$vi /etc/httpd/conf.d/git.conf 
+
+Alias /gitweb /var/www/html/gitweb
+
+<Directory /var/www/html/gitweb>
+  Options +ExecCGI
+  AddHandler cgi-script .cgi
+  DirectoryIndex gitweb.cgi
+</Directory>
+<Location /gitweb>
+   AuthType Basic
+   AuthName "Git Access"
+   Require valid-user
+   AuthUserFile /etc/httpd/conf/git.passwd
+</Location>
+
+Step 9: Now we will create Basic apache auth username and password.
+When you create a first time a user then only we use “-c” flag. -c means create new file. see man page of htpasswd.
+
+	$htpasswd -c /etc/httpd/conf/git.passwd admin
+
+For new user addition or updating existing user’s password do not use -c flag
+	$htpasswd /etc/httpd/conf/git.passwd  user1
+	$htpasswd /etc/httpd/conf/git.passwd  testuser
+Restart/Reload the apache whenever you setup a htpasswd user or passwd
+chkconfig command to set apache service to run in runelevel 3 and 5 whenever system start.
+
+#### On CentOS 6.x / RHEL 6.x
+/etc/init.d/httpd restart;chkconfig httpd on
+
+#### On CentOS 7.x / RHEL 7.x
+systemctl restart httpd ; systemctl enable httpd 
+
+Step 10: How to see GitWeb webpage
+Open the web browser and in URL type
+(give username and password which you set at htpasswd command)
+
+http://ip-address-of-git-server/gitweb/
+
+Step 11 : Update the projects.list file or give read access to @all in gitolite.conf to view the repository under gitweb
+Now update the file projects.list file with new git repo name which you have just created as described in above section.
+
+	$vi /home/git/projects.list
+		testing.git
+		linux.git
+Once you updated the /home/git/projects.list file, it will help you to show repository on Gitweb.
+
+https://github.com/github/platform-samples/tree/master/pre-receive-hooks

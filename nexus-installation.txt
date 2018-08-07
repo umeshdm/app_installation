@@ -1,0 +1,44 @@
+#############################   installing nexus on centos 7 ##############################
+
+1. Create nexus user
+	$ adduser nexus
+
+2. Set password
+	$ passwd nexus
+
+3. Add nexus user to sudoers group
+	$ usermod -aG wheel nexus 
+	$ su - nexus
+
+4. download nexus and untar
+	$ sudo wget http://download.sonatype.com/nexus/3/nexus-3.9.0-01-unix.tar.gz
+	$ sudo tar -xvf nexus-3.9.0-01-unix.tar.gz
+
+5. Rename the untared file to nexus.
+	$sudo mv nexus-3.9.0-01 nexus
+
+6. As a good security practice, it is not advised to run nexus service with any sudo user. So create a new user named nexus.
+	$sudo adduser nexus
+
+7. Change the ownership of nexus file to nexus user.
+	$sudo chown -R nexus:nexus /home/nexus
+	$sudo chmod -R 755 /home/nexus
+
+	$sudo chown -R nexus:nexus /home/nexus/sonatype-work
+	$sudo chmod -R 755 /home/nexus/sonatype-work
+8. need to change defalt port 8081 to any... like 9091 for that we need to update properties file 
+	$ vi /home/nexus/sonatype-work/nexus3/etc/nexus.properties
+	
+		Uncomment below line and change port from 8081 to 9091 and save 	
+			application-port=9091
+9. now we need to start nexus
+	
+	$cd /home/nexus/nexus/bin
+	$./nexus start
+	
+10. check logs till you will see a msg "Started Sonatype Nexus OSS 3.9.0-01" and then try accessing below url
+	$ cd /home/nexus/sonatype-work/nexus3/log
+	$ tail -f nexus.log
+
+
+http://localhost:9000/ -----------> [username : admin][password: admin123]

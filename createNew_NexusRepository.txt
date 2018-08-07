@@ -1,0 +1,32 @@
+#1.	create json file 
+		#!/bin/bash
+		echo '{ "name": "maven", "type": "groovy", "content": "repository.createMavenHosted('"'${REPO_NAME}'"')"}' > upload.json
+        echo "##################### JSON FILE CREATED successfully................######################## "
+
+#2. 	upload json script file
+		
+		curl -v -X POST -u admin:admin123 --header "Content-Type: application/json" "http://localhost:9000/service/rest/v1/script" -d @upload.json
+		echo "##################### script UPLOADED successfully................######################## "
+        cd /app/nexus-book-examples/scripting/simple-shell-example/
+        ./list.sh
+		
+#3.  create repository on server		
+		
+		cd /app/nexus-book-examples/scripting/simple-shell-example/
+		./create.sh maven
+        echo "##################### $REPO_NAME crated successfully................######################## "
+
+
+		
+#4.  delete script from server		
+		cd /app/nexus-book-examples/scripting/simple-shell-example/
+		./list.sh
+        cd /app/nexus-book-examples/scripting/simple-shell-example/
+		./delete.sh maven
+        echo "##################### script deleted successfully................######################## "
+		cd /app/nexus-book-examples/scripting/simple-shell-example/
+        ./list.sh
+		
+
+################ Follow below page to create repository in nexus using script  ####################################################		
+https://github.com/sonatype/nexus-book-examples/tree/nexus-3.x/scripting

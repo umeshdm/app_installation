@@ -1,0 +1,46 @@
+Installing jenkins :
+
+1. switch to root user 
+$ sudo su
+
+2. Create jenkins user
+$ adduser jenkins
+
+3. Set password
+$ passwd jenkins
+
+4. Add jenkins user to sudoers group
+$ usermod -aG wheel jenkins 
+
+5. Install java 8 as a root
+$ yum install java -y
+
+6. Switch to jenkins user 
+$ su - jenkins
+
+7. Install jenkins
+$ sudo wget -O /etc/yum.repos.d/jenkins.repo https://pkg.jenkins.io/redhat-stable/jenkins.repo
+$ sudo rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io.key
+$ sudo yum install jenkins
+
+8. Stop Jenkins service
+$ sudo service jenkins stop
+
+P.S : important commands
+$ sudo chkconfig jenkins on
+$ systemctl start jenkins
+$ systemctl enable jenkins
+
+8. create folder jenkinshome under /home/jenkins with jenkins user
+$ mkdir jenkinshome
+
+9. Change JENKINS_HOME varaible value under /etc/sysconfig/jenkins file to /home/jenkins/jenkinshome
+$ sudo vi /etc/sysconfig/jenkins
+
+JENKINS_HOME="/home/jenkins/jenkinshome"
+
+10. Start jenkins service
+$ sudo service jenkins start
+$ sudo chkconfig jenkins on
+$ systemctl start jenkins
+$ systemctl enable Jenkins

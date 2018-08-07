@@ -1,0 +1,8 @@
+#how can we change or replace a tag in XML file 
+
+
+sed -i 's#<name>.*#<name>clix-app</name>#' pom.xml
+
+sed -i 's:<status environment="staging">on</status>:<status environment="staging">off</status>:' global.xml
+
+sed -i 's#<name>.*#<name>clix-app</name>#' pom.xml
